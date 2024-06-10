@@ -3,23 +3,10 @@ package main
 import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"gomarket/models"
-	"html/template"
+	"gomarket/routes"
 	"log"
 	"net/http"
 )
-
-var templates = template.Must(template.ParseGlob("templates/*.html"))
-
-func index(w http.ResponseWriter, r *http.Request) {
-	products := models.GetAllProducts()
-
-	err := templates.ExecuteTemplate(w, "Index", products)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
-}
 
 func main() {
 	err := godotenv.Load()
@@ -27,6 +14,7 @@ func main() {
 		log.Fatalf("Error loading .env.example file: %v", err)
 	}
 
-	http.HandleFunc("/", index)
+	routes.Load()
+
 	log.Fatal(http.ListenAndServe(":8000", nil))
 }
