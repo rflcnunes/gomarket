@@ -51,3 +51,15 @@ func CreateProduct(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	convertedId, err := strconv.Atoi(id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	models.DeleteProduct(convertedId)
+	http.Redirect(w, r, "/", http.StatusMovedPermanently)
+}

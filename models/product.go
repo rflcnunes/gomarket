@@ -59,3 +59,16 @@ func CreateProduct(product Product) Product {
 
 	return product
 }
+
+func DeleteProduct(id int) {
+	db := database.ConnectDB()
+	preparedProduct, err := db.Prepare("DELETE FROM products WHERE id = $1")
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	_, _ = preparedProduct.Exec(id)
+
+	defer db.Close()
+}
