@@ -1,7 +1,9 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -29,6 +31,11 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
 	http.HandleFunc("/", index)
 	http.ListenAndServe(":8000", nil).Error()
 }
