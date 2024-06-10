@@ -1,6 +1,8 @@
 package models
 
-import "database/sql"
+import (
+	"gomarket/database"
+)
 
 type Product struct {
 	Id, Quantity      int
@@ -8,7 +10,8 @@ type Product struct {
 	Price             float64
 }
 
-func GetAllProducts(db *sql.DB) []Product {
+func GetAllProducts() []Product {
+	db := database.ConnectDB()
 	rows, err := db.Query("SELECT id, name, description, quantity, price FROM products")
 
 	if err != nil {
@@ -38,5 +41,6 @@ func GetAllProducts(db *sql.DB) []Product {
 		products = append(products, product)
 	}
 
+	defer db.Close()
 	return products
 }
