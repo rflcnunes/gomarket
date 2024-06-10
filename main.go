@@ -11,11 +11,12 @@ import (
 )
 
 var templates = template.Must(template.ParseGlob("templates/*.html"))
+var db *sql.DB
 
 type Product struct {
+	Id, Quantity      int
 	Name, Description string
 	Price             float64
-	Quantity          int
 }
 
 func connectDB() *sql.DB {
@@ -35,13 +36,41 @@ func connectDB() *sql.DB {
 	return db
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	products := []Product{
-		{"Product 1", "Description 1", 1.99, 10},
-		{"Product 2", "Description 2", 2.99, 20},
-		{"Product 3", "Description 3", 3.99, 30},
-		{"Product 4", "Description 4", 4.99, 40},
+func getAllProducts() []Product {
+	rows, err := db.Query("SELECT id, name, description, quantity, price FROM products")
+
+	if err != nil {
+		panic(err.Error())
 	}
+
+	product := Product{}
+	var products []Product
+
+	for rows.Next() {
+		var id, quantity int
+		var name, description string
+		var price float64
+
+		err = rows.Scan(&id, &name, &description, &quantity, &price)
+
+		if err != nil {
+			panic(err.Error())
+		}
+
+		product.Id = id
+		product.Name = name
+		product.Description = description
+		product.Quantity = quantity
+		product.Price = price
+
+		products = append(products, product)
+	}
+
+	return products
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	products := getAllProducts()
 
 	err := templates.ExecuteTemplate(w, "Index", products)
 
@@ -56,9 +85,9 @@ func main() {
 		log.Fatalf("Error loading .env.example file: %v", err)
 	}
 
-	db := connectDB()
+	db = connectDB()
 	defer db.Close()
 
 	http.HandleFunc("/", index)
-	http.ListenAndServe(":8000", nil).Error()
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
